@@ -1,0 +1,492 @@
+
+
+algorithm01_day01
+
+1.选择排序
+
+
+    public static int[] selectionSort(int[]arr){
+        if(arr == null || arr.length < 2){
+            return arr;
+        }
+        for(int i = 0;i < arr.length - 1;i++){
+            int minIndex = i;
+            for(int j = i + 1;j < arr.length;j++){      //循环一次找到最小值下标
+                //若当前数小于minIndex所记录的数，则更新最小值下标
+                minIndex = arr[j] < arr[minIndex] ? j : minIndex;
+            }
+            swap(arr,i,minIndex);                       //将记录的最小值的下标，进行交换，完成一次选择排序
+        }
+        return arr;
+    }
+
+
+
+2. 冒泡排序
+
+
+    public static int[] bubbleSort(int[] arr) {
+        if(arr == null || arr.length < 2){
+            return arr;
+        }
+        for(int i = arr.length-1;i > 0;i--){        //每次冒泡一次，从 0-n-1 减小一次
+            for(int j = 0;j < i;j++){
+                if(arr[j] > arr[j+1]){              //每次把大的数往后冒泡
+                    swap(arr,j,j+1);
+                }
+            }
+        }
+        return arr;
+    }
+
+
+
+
+3. 异或运算  ： 相同为0，不同为1
+
+
+
+			1 ^ 0 = 1
+			0 ^ 1 = 1
+
+			1 ^ 1 = 0
+			0 ^ 0 = 0
+
+
+		1.	异或运算可以理解为无进位相加
+
+
+		2.	异或运算满足交换，结合，且与异或的先后顺序无关
+
+		3.  两数a,b进行交换，可以采用 异或的方式
+
+
+			前提条件：a , b在内存空间中地址不同
+
+
+			数组中使用，前提条件，arr[i] != arr[j]
+
+
+
+
+3.1  数组中有 一种数出现奇数次，其他数出现偶数次，找出出现奇数次的数 ？
+
+
+		将数组中的数全部进行一边异或操作，偶数次的数异或完得到0，最终只剩下出现奇数次的数
+
+
+		例：  123211313  等价于  1111 22 333	0 0 3
+
+
+		//使用异或运算得到，数组中唯一出现一次的奇数次数字
+		public static void odd_one(int[]arr){
+			int eor = 0;
+			for (int i : arr) {
+				eor ^= i;
+			}
+			System.out.println("出现奇数次的数为：" + eor);
+		}
+
+
+
+
+3.2  数组中有 两种数出现奇数次，其他数出现偶数次，找出出现奇数次的两个数ab ？
+
+
+
+	1.首先将数组中的数全部异或一遍，得到 a ^ b
+
+	2，因为 eor = a ^ b 不等于0，可知a b 两个数在二进制某一位上一定不相同
+
+		因此可以将数分为两部分，一个是某一位上为1的数，一个是某一位上不为1的数
+
+	3. 选择 a ^ b的最右边的1  ：  int rightOne = eor & ( ~eor + 1 )
+
+	4.将 rightone与位数为1(或者位数为0)的数全部异或，则得到 a或者b中的某个数
+
+
+
+
+		public static void odd_two(int[]arr){
+			int eor = 0;
+			for (int i : arr) {
+				eor ^= i;           //得到 eor = a ^ b      a ,b 在某一位上一定不相同
+			}
+
+			int rightOne = eor & (~eor + 1);     //取出最右的 1			0000000010000000
+
+			int onlyOne = 0;
+			for (int i : arr) {
+				if((rightOne & i) == 0){        //将某位数为0的数全部进行异或
+					onlyOne ^= i;
+				}
+			}
+			System.out.println(onlyOne + " " + (eor ^ onlyOne));
+		}
+
+
+
+
+
+4.  插入排序
+
+
+		每一次都将当前所遍历到的数和前面有序的数进行比较
+
+
+
+		public static int[] insertSort(int[] arr) {
+			if(arr == null || arr.length < 2){
+				return arr;
+			}
+
+			for (int i = 1; i < arr.length; i++) {  //每一次都将当前index 和前面有序的数进行比较
+				for (int j = i-1; j >= 0 && arr[j] > arr[j+1] ; j--) {   //当 j >=0 并且 当前的数要比有序数组中的数要小，才循环
+						swap(arr,j,j+1);
+				}
+			}
+			return arr;
+		}
+
+
+
+
+
+
+5.二分法 详解与二分法的扩展
+
+
+	5.1  有序数组中，找出某个数是否存在
+
+
+
+			采用二分法：
+
+				1.从数组的两端开始，left=0  right=arr.length-1、
+
+				2.mid = left + (right-left) / 2
+
+				3.判断mid和target的大小：
+
+					若 arr[mid] == target: 	 找到target，返回结果
+					若 arr[mid] > target :   目标在左侧，缩小右边界, right = mid - 1;
+					若 arr[mid] < target :   目标在右侧，增大左边界，left = mid + 1
+
+
+
+
+			代码：
+
+				public static boolean binarySearch(int[]arr,int target){
+					if(arr == null || arr.length == 0){
+						return false;
+					}
+					int left = 0,right = arr.length-1;
+					int mid = 0;
+					while(left < right){
+						mid = left + (right - left) / 2;
+						if(arr[mid] == target){
+							return true;
+						}else if(arr[mid] > target){	//目标在左侧
+							right = mid - 1;
+						}else{
+							left = mid + 1;				//目标在右侧
+						}
+					}
+					return false;
+				}
+
+
+
+
+
+
+	5.2  在一个有序数组中，找 >= 某个数最左侧的位置
+
+
+
+			11122233334444555
+
+			1.当二分查找mid等于target时，此时可能还有更左侧的位置：
+
+				index = mid
+				right = mid - 1
+
+			2.继续进行二分
+
+
+
+			代码：
+
+				public static int binarySearch_left(int[]arr,int target){
+					if(arr == null || arr.length == 0){
+						return -1;
+					}
+					int left = 0,right = arr.length-1,mid=0;
+					int index = 0;
+					while(left < right){
+						mid = left + (right-left) / 2;
+						if(arr[mid] == target){     //此时 arr[mid] == target,可能还有更左侧的位置
+							index = mid;
+							right = mid - 1;
+						}else{
+							left = mid + 1;
+						}
+					}
+					return index;
+				}
+
+
+
+
+
+
+	5.3 局部最小值 问题
+
+
+
+		  mid 左侧某个数left 比 mid 大
+		  mid 右侧某个数right 比 mid 大
+
+
+		  则在left和right之间，一定存在某个局部最小值，可以使用二分查找
+
+
+
+
+
+
+
+
+
+algorithm01_day02
+
+
+
+
+1. 归并排序
+
+
+		基本思想：
+
+			1.将左边数组排好序
+			2.将右边数组排好序
+			3.合并两个数组
+
+
+		merge过程：
+
+			当a <= mid && b < r时：说明数组指针未越界
+
+				1.若 arr[a] > arr[b] :将b所指的数字存入result数组中,b++
+				2.若 arr[a] < arr[b] :将a所指的数字存入result数组中,a++
+				3.若A B 两数组有一个数组已经走完，直接把另一个数组的值存入result中
+
+
+		代码：
+
+			public static void main(String[] args) {
+				int []sort = {2,222,44,520,0,6666,5,666,88};
+				mergeSort(sort,0,sort.length-1);
+				for (int i : sort) {
+					System.out.println(i);
+				}
+			}
+
+			private static void mergeSort(int[] arr, int left, int right) {
+				if(left == right) return;       	//递归结束条件
+				int mid = left + (right-left) / 2;
+													//递归：先对左边进行排序，再对右边进行排序，最后合并数组
+				mergeSort(arr,0,mid);
+				mergeSort(arr,mid+1,right);
+				merge(arr,left,mid,right);
+
+			}
+
+			private static void merge(int[] arr, int left, int mid, int right) {           //完成 left-right区间上一次 merge过程
+				int[] help = new int[right-left+1];     	 //创建与合并数组同长度的数组
+				int len = 0,p1 = left,p2= mid + 1;      	 //left,right与传入的参数有关
+				while(p1 <= mid && p2 <= right){        	 //两个数组均未走完
+					help[len++] = arr[p1] > arr[p2] ? arr[p2++] : arr[p1++];
+				}
+				while(p1 <= mid){                       	 //p1剩余
+					help[len++] = arr[p1++];
+				}
+				while(p2 <= right){
+					help[len++] = arr[p2++];            	 //p2未剩余
+				}
+				for (int i = 0; i < help.length; i++) {
+					arr[left+i] = help[i];
+				}
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. 归并排序的扩展
+
+
+	小和问题和逆序对问题：
+
+		小和问题：
+
+			在一个数组中，每一个数左边比当前数小的数累加起来，叫做这个数组的小和。求一个数组 的小和。
+
+			例子:[1,3,4,2,5] 1左边比1小的数，没有; 3左边比3小的数，1; 4左
+			边比4小的数，1、3; 2左边比2小的数，1; 5左边比5小的数，1、3、4、2; 所以小和为1+1+3+1+1+3+4+2=16
+
+
+		逆序对问题：
+
+			在一个数组中，左边的数如果比右边的数大，则折两个数构成一个逆序对，请打印所有逆序对。
+
+
+
+
+		public static void main(String[] args) {
+			int []sort = {1,3,4,2,5};
+			int result = mergeSort(sort,0,sort.length-1);
+			System.out.println(result);
+		}
+
+		private static int mergeSort(int[] arr, int left, int right) {  //递归归并算法
+			if(left ==  right) return 0;
+			int mid = left + (right-left) / 2;          //res = 左边数组 + 右边数组 + merge合并
+			return mergeSort(arr,left,mid) + mergeSort(arr,mid+1,right) + merge(arr,left,mid,right);
+		}
+
+		private static int merge(int[] arr, int left, int mid, int right) {
+			int[] help = new int[right-left+1];
+			int len = 0,p1 = left,p2 = mid + 1;
+			int res = 0;
+			while(p1 <= mid && p2 <= right){
+				res += arr[p1] < arr[p2] ? (right-p2+1) * arr[p1] : 0;          //计算出当前合并时，右边总共有多少个比当前数大的数字
+				help[len++] = arr[p1] < arr[p2] ? arr[p1++] : arr[p2++];        //当两个数相等时，默认先合并右边数组的数
+			}
+			while(p1 <= mid){
+				help[len++] = arr[p1++];
+			}
+			while(p2 <= right){
+				help[len++] = arr[p2++];
+			}
+			for (int i = 0; i < help.length; i++) {
+				arr[left + i] = help[i];
+			}
+			return res;
+		}
+
+
+
+
+
+
+
+
+
+
+3. 荷兰国旗问题
+
+
+问题一
+		给定一个数组arr，和一个数num，请把小于等于num的数放在数组的左边，大于num的数放在数组的右边。  要求额外空间复杂度O(1)，时间复杂度O(N)
+
+		i   leftIndex
+
+		1.用一个指针i遍历整个数组
+		2.将数组分为两部分，小于等于num的部分和当前未遍历的部分
+		3.当 i <= num 时，将当前数字和 <= num后一个数字进行交换
+
+
+
+
+
+
+
+
+问题二(荷兰国旗问题)
+
+		给定一个数组arr，和一个数num，请把小于num的数放在数组的左边，等于num的数放在数组的中间，大于num的数放在数组的右边。
+
+		要求额外空间复杂度O(1)，时间复杂度O(N)
+
+
+			i  leftIndex  rightIndex
+
+		1.当 cur < num 时：和左边界后一个数字进行交换,i++
+		2.当 cur = num 时：i++
+		3.当 cur > num 时：和右边界前一个数字进行交换，此时 i 不变
+
+
+
+
+			private static int[] partition(int[] arr,int l,int r,int target) {
+				int left = l - 1;
+				int right = r + 1 ;
+				while(l < right){
+					if(arr[l] < target){                //当前 num < target: 和left后一个进行交换,l++
+						swap(arr,++left,l++);
+					}else if(arr[l] > target){          //当前 num > target: 和right前一个进行交换,此时 l 不变
+						swap(arr,--right,l);
+					}else{
+						l++;                            //num == target ,si++
+					}
+				}
+				return new int[]{left+1,right-1};         //返回相等部分前后的下标
+			}
+
+
+
+
+
+
+
+
+
+4. 快速排序
+
+
+
+
+不改进的快速排序
+
+
+		1）把数组范围中的最后一个数作为划分值，然后把数组通过荷兰国旗问题分成三个部分：
+
+			左侧<划分值、中间==划分值、右侧>划分值
+
+
+		2）对左侧范围和右侧范围，递归执行
+			分析
+			1）划分值越靠近两侧，复杂度越高；划分值越靠近中间，复杂度越低
+			2）可以轻而易举的举出最差的例子，所以不改进的快速排序时间复杂度为O(N^2)
+
+
+
+
+
+
+
+
+随机快速排序（改进的快速排序）
+
+		1）在数组范围中，等概率随机选一个数作为划分值，然后把数组通过荷兰国旗问题分成三个部分：
+
+				左侧<划分值、中间==划分值、右侧>划分值
+
+		2）对左侧范围和右侧范围，递归执行
+
+		3）时间复杂度为O(N*logN)
+
+
+
