@@ -399,7 +399,7 @@ algorithm01_day02
 
 
 问题一
-		给定一个数组arr，和一个数num，请把小于等于num的数放在数组的左边，大于num的数放在数组的右边。  要求额外空间复杂度O(1)，时间复杂度O(N)
+		给定一个数组arr，和一个数num，请把小于等于 num的数放在数组的左边，大于num的数放在数组的右边。  要求额外空间复杂度O(1)，时间复杂度O(N)
 
 		i   leftIndex
 
@@ -489,4 +489,274 @@ algorithm01_day02
 		3）时间复杂度为O(N*logN)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+algorithm01_03
+
+
+
+
+	堆
+
+	1.堆结构就是用数组实现的完全二叉树结构
+
+	2.完全二叉树中如果每棵子树的最大值都在顶部就是大根堆
+
+	3.完全二叉树中如果每棵子树的最小值都在顶部就是小根堆
+
+	4.堆结构的 heapInsert与 heapify操作
+
+	5.堆结构的增大和减少
+
+	6.优先级队列结构，就是堆结构
+
+
+
+
+
+1. 堆排序
+
+
+
+堆排序
+
+
+	1.先让整个数组都变成大根堆结构,保证堆顶从上往下都为递减趋势
+
+		1)从上到下的方法，时间复杂度为O(N*logN)
+		2)从下到上的方法，时间复杂度为O(N)
+
+	2.把堆的最大值和堆末尾的值交换，然后减少堆的大小之后，再去调整堆，一直周而复始，时间复杂度为O(N*logN)
+
+	3.堆的大小减小成0之后，排序完成
+
+
+
+
+	父节点： (index-1) / 2
+	左孩子：（index*2）+ 1
+	右孩子：（index*2）+ 2
+
+
+	heapInsert()		初始建堆过程，保证堆顶从上往下都为递减趋势
+	heapify()			维护大根堆
+
+
+
+
+
+
+
+			public static void heapSort(int[] arr) {
+				if (arr == null || arr.length < 2) {
+					return;
+				}
+				for (int i = 0; i < arr.length; i++) {      //自顶向上初始化大根堆
+					heapInsert(arr, i);
+				}
+		//      for (int i = arr.length-1; i >= 0; i--) {   //自底向上初始化大根堆
+		//          heapify(arr,i,arr.length);
+		//      }
+
+				int size = arr.length;
+				swap(arr,0,--size);                              //移除大根堆堆顶，大根堆顶和最后一个元素进行交换
+				while(size > 0){
+					heapify(arr,0,size);                      //维护大根堆
+					swap(arr,0,--size);                          //移除一次大根堆堆顶，继续维护
+				}
+			}
+
+			//维护大根堆
+			private static void heapify(int[] arr, int index, int size) {
+				int left = (index * 2) + 1;
+				while(left < size){
+					int largest = left + 1 < size && arr[left + 1] > arr[left] ? left + 1 : left;     //获取较大左右孩子的下标
+					largest = arr[largest] > arr[index] ? largest : index;
+					if(largest == index) break;
+					swap(arr,largest,index);
+					index = largest;                    //更新index，使之等于孩子结点，继续往下维护大根堆
+					left = index * 2 + 1;
+				}
+			}
+
+			//初始化大根堆，保证堆顶从上往下都为递减趋势
+			public static void heapInsert(int[] arr, int index) {
+				while (arr[index] > arr[(index - 1) / 2]) {           //当前节点比父节点大，则交换，并继续往上进行判断
+					swap(arr, index, (index - 1) / 2);
+					index = (index - 1) / 2;
+				}
+			}
+
+
+
+
+2. 堆排序扩展
+
+
+
+	已知一个几乎有序的数组，几乎有序是指，如果把数组排好顺序的话，每个元素移动的距离可以不超过k，并且k相对于数组来说比较小。
+
+	请选择一个合适的排序算法针对这个数据进行排序。
+
+
+
+	思路： 采用小根堆
+
+	1. 初始化k个数字放入数组中
+	2. 每次从小根堆中弹出一个最小值，放入有序数组中
+	3. 加入新的值进入小根堆中，重复此步骤，最后将堆中所有元素有序加入数组
+
+
+
+
+
+    public static void sortedArrDistanceLessK(int[]arr,int k){
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        int index = 0;
+        while(index < k){                   //首先将 K 个数字添加到小根堆中
+            heap.add(arr[index++]);
+        }
+        int i = 0;
+        while(index < arr.length){          //每次从小根堆中得到最小值，放入有序数组中，并加入新的值进入小根堆中
+            heap.add(index++);
+            arr[i++] = heap.poll();
+        }
+        while(!heap.isEmpty()){             //最后将小根堆中所有值有序存入数组
+            arr[i++] = heap.poll();
+        }
+    }
+
+
+
+
+
+
+
+
+
+3. Comparator 比较器的使用
+
+
+		1）比较器的实质就是重载比较运算符
+
+		2）比较器可以很好的应用在特殊标准的排序上
+
+		3）比较器可以很好的应用在根据特殊标准排序的结构上
+
+
+
+
+
+		//返回负数，第一个参数排前面	即 o1 < o2
+		//返回正数，第二个参数排前面	即 o1 > o2
+		//返回0，都可以
+
+
+		public void compare(Object o1,Object o2){
+
+			return o1-o2
+
+		}
+
+
+
+
+
+
+4.基数排序
+
+
+		maxbit		计算当前数组中的最大 位数
+		getDigit	传入数字，返回第 d 位上的数字
+
+
+		1. 利用数组count统计，某个位上的数字总数
+		2. 计算前缀和，表示前面有多少个数字小于等于当前数，用于出桶时，确定元素位置
+		3. 从右往左遍历，出桶操作，利用前缀和 和 计数操作确定元素位置
+		4. 赋值给arr，进行下一次基数排序
+
+
+
+
+
+		private static void radixSort(int[] arr, int begin, int end, int digit) {
+			final int radix = 10;
+			int i = 0,j = 0;
+			int[] bucket = new int[end - begin +1];
+
+			for (int d = 1; d <= digit; d++) {              //基数排序外层总次数
+				int[]count = new int[radix];
+
+				for(i = begin;i <= end;i++){
+					j = getDigit(arr[i],d);
+					count[j]++;                             //利用数组count统计，某个位上的数字总数
+				}
+
+				for(i = 1;i < radix;++i){
+					count[i] = count[i] + count[i-1];       //计算前缀和，表示前面有多少个数字小于等于当前数，用于出桶时，确定元素位置
+				}
+
+				for(i = end;i >= begin;i--){
+					j = getDigit(arr[i],d);
+					bucket[count[j]-1] = arr[i];            //从右往左遍历，出桶操作，利用前缀和 和 计数操作确定元素位置
+					count[j]--;
+				}
+				for(i = begin,j=0;i <= end;i++,j++){        //赋值给arr，进行下一次基数排序
+					arr[i] = bucket[j];
+				}
+			}
+		}
+
+
+		//计算当前数组中的最大 位数
+		private static int maxbit(int[] arr) {
+			int max = Integer.MIN_VALUE;
+			for (int i = 0; i < arr.length; i++) {
+				max = Math.max(arr[i],max);
+			}
+			int res = 0;
+			while(max != 0){
+				res++;
+				max /= 10;
+			}
+			return res;
+		}
+
+
+		//传入数字，返回第 d 位上的数字
+		public static int getDigit(int x, int d) {
+			return ((x / ((int) Math.pow(10, d - 1))) % 10);			//先除以 x 舍去后面部分，在整除 10 获得最后一位
+		}
+
+
+
+
+
+
+
+
+5. 桶排序思想下的排序
+
+	1）计数排序
+
+	2）基数排序
+
+
+
+	分析：
+		1)桶排序思想下的排序都是不基于比较的排序
+
+		2)时间复杂度为O(N)，额外空间负载度O(M)
+
+		3)应用范围有限，需要样本的数据状况满足桶的划分
 
